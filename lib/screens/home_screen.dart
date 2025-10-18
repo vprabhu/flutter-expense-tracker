@@ -4,6 +4,7 @@ import '../widgets/pie_chart.dart';
 import '../widgets/spendingBreakdown.dart';
 import 'add_expenses_screen.dart';
 import '../widgets/recent_list.dart';
+import 'expense_details_screen.dart';
 
 // ExpensesScreen: The main screen displaying expenses breakdown and recent expenses
 class ExpensesScreen extends StatefulWidget {
@@ -24,7 +25,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
         amount: 75.00,
         icon: Icons.store,
         color: Colors.blue[300],
-        id: ''
+        id: '',
+      note: "Full form with merchant, amount, category, date, note, receipt upload"
     ),
     Expense(
       title: 'Gas Station',
@@ -83,8 +85,24 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       }
     });
   }
-
+// Navigate to ExpenseDetailsScreen for editing/viewing
+  void _onExpenseTap(int index) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => ExpenseDetailsScreen(
+          expense: _recentExpenses[index],
+          index: index,
+          onUpdate: (idx, updated) {
+            setState(() {
+              _recentExpenses[idx] = updated;
+            });
+          },
+        ),
+      ),
+    );
+  }
   // Functionality: Handle tap on recent expense (e.g., show dialog with details)
+/*
   void _onExpenseTap(Expense expense) {
     showDialog(
       context: context,
@@ -109,6 +127,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           ),
     );
   }
+*/
 
   @override
   Widget build(BuildContext context) {
@@ -159,7 +178,8 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
                 itemBuilder: (context, index) {
                   final expense = _recentExpenses[index];
                   return buildExpenseCard(
-                      expense, () => _onExpenseTap(expense));
+                      expense, () => _onExpenseTap(0));
+                      // expense, () => _onExpenseTap(expense));
                 },
               ),
             ],
