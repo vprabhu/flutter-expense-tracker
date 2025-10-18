@@ -1,16 +1,34 @@
-# expense_tracker
+# Flutter Expense Tracker
 
-A new Flutter project.
+**Brutally simple expense tracker MVP built with Flutter & Firebase. Shipped in 5 days as a live accountability challenge.**
+
+## Features
+- Add expense (amount, category, note)
+- View expense list (date, amount, category)
+- Edit and delete expenses
+- Secure sign-in (Email/Auth)
+- Cloud sync via Firestore
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+1. **Clone the repo**
+2. Open in VSCode/Android Studio
+3. Add your Firebase keys (`google-services.json`)
+4. Run on device/emulator
 
-A few resources to get you started if this is your first Flutter project:
+## Why this MVP?
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+To show what happens when you stop making excuses and actually ship—publicly, relentlessly, in 5 days. All progress, bugs, and fixes are live and documented.
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Roadmap
+
+- Polish UI
+- Add summary screen
+- Take feature requests—build what users actually want
+
+## Contributions & Feedback
+
+Open issues, fork, or message me on LinkedIn. All feedback, critique, and feature requests wanted.
+
+---
+
