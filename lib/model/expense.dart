@@ -1,22 +1,31 @@
 import 'package:flutter/material.dart';
 
+/* ----------------------------------------------------------
+   Plain data object that represents one purchase
+// Data Model: ExpenseItem for recent expenses
+   ---------------------------------------------------------- */
+
 class Expense {
-  final String id;
+  final String? id;
   final String title;
   final String category;
   final double amount;
-  final DateTime date;
+  final DateTime? date;
   final String? note;
   final String? imageUrl; // For receipt/photo, if needed
+  final IconData? icon;
+  final Color? color;
 
   Expense({
-    required this.id,
+    this.id,
     required this.title,
     required this.category,
     required this.amount,
-    required this.date,
+    this.date,
     this.note,
     this.imageUrl,
+    this.icon,
+    this.color,
   });
 
   // Factory for converting Firestore or JSON maps to Expense
@@ -38,10 +47,10 @@ class Expense {
       'title': title,
       'category': category,
       'amount': amount,
-      'date': date.toIso8601String(),
+      'date': date,
+      // 'date': date.toIso8601String(),
       'note': note,
       'imageUrl': imageUrl,
     };
   }
 }
-
