@@ -1,3 +1,4 @@
+import 'package:expense_tracker/screens/filter_screen.dart';
 import 'package:expense_tracker/screens/home_screen.dart';
 import 'package:expense_tracker/screens/profile_screen.dart';
 import 'package:expense_tracker/screens/summary_screen.dart';
@@ -25,7 +26,8 @@ class _NavBarState extends State<NavBar> {
     // Initialize screens (Home and Profile are placeholders; expand as needed)
     _screens = [
       const ExpensesScreen(), // Stats/Expenses screen (from previous code)
-      const SummaryScreen(), // Placeholder Home screen
+      // const SummaryScreen(), // Placeholder Home screen
+      const FilterExpensesScreen(), // Placeholder Home screen
       const ProfileScreen(), // Placeholder Profile screen
 
     ];
