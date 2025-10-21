@@ -28,7 +28,7 @@ class _SignInScreenState extends State<SignInScreen> {
     if (user != null) {
       // Navigate to home; prevents going "back" to login.
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
+        MaterialPageRoute(builder: (_) => HomeScreen(user: user, authService: _authService,)),
       );
     } else {
       // Optionally: show a cancel/toast or just silently stay
