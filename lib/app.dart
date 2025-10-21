@@ -17,7 +17,7 @@ class SmartSpendsApp extends StatelessWidget {
       routes: {
         '/': (context) => SplashScreen(),
         '/login': (context) => SignInScreen(),
-        '/home': (context) => HomeScreen(),
+        // '/home': (context) => HomeScreen(),
       },
     );
   }
