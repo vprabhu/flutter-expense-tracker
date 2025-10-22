@@ -5,6 +5,8 @@ import '../widgets/spendingBreakdown.dart';
 import 'add_expenses_screen.dart';
 import '../widgets/recent_list.dart';
 import 'expense_details_screen.dart';
+import 'filter_screen.dart';
+import 'package:intl/intl.dart';
 
 // ExpensesScreen: The main screen displaying expenses breakdown and recent expenses
 class ExpensesScreen extends StatefulWidget {
@@ -15,18 +17,18 @@ class ExpensesScreen extends StatefulWidget {
 }
 
 class _ExpensesScreenState extends State<ExpensesScreen> {
-
   // Sample data for recent expenses: List of expense items
   // final List<Expense> _recentExpenses = dummyExpenses;
   final List<Expense> _recentExpenses = [
     Expense(
-        title: 'Fresh Foods Market',
-        category: 'Grocery',
-        amount: 75.00,
-        icon: Icons.store,
-        color: Colors.blue[300],
-        id: '',
-      note: "Full form with merchant, amount, category, date, note, receipt upload"
+      title: 'Fresh Foods Market',
+      category: 'Grocery',
+      amount: 75.00,
+      icon: Icons.store,
+      color: Colors.blue[300],
+      id: '',
+      note:
+          "Full form with merchant, amount, category, date, note, receipt upload",
     ),
     Expense(
       title: 'Gas Station',
@@ -59,7 +61,14 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   ];
 
   // Total spent: Hardcoded as per design
-  final double totalSpent = 1250.00;
+  // final double totalSpent = 1250.00;
+  DateTimeRange? _filterRange; // Current filter range (null for all)
+
+  // Computed: Total spent from filtered expenses
+  double get totalSpent {
+    final filtered = _getFilteredExpenses();
+    return filtered.fold<double>(0.0, (sum, expense) => sum + expense.amount);
+  }
 
   // Pie chart data: Categories with amounts and colors matching design shades
   // Food (blue), Transport (darker blue), Entertainment (light blue), Utilities (lighter blue)
@@ -70,22 +79,61 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     PieSegment(label: 'Utilities', amount: 300.0, color: Colors.blue[100]!),
   ];
 
-// Functionality: Navigate to AddExpenseScreen on + tap
-  void _navigateToAddExpense() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const AddExpenseScreen()),
-    ).then((result) {
-      // Optional: Handle result from AddExpense (e.g., refresh list if new expense added)
-      if (result == true) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Expense added successfully!')),
-        );
-        // Trigger setState to refresh if needed
-        setState(() {});
-      }
-    });
+  // Helper: Get filtered expenses based on _filterRange
+  List<Expense> _getFilteredExpenses() {
+    if (_filterRange == null) return _recentExpenses;
+    return _recentExpenses.where((expense) {
+      // Include expenses within the date range (inclusive, with day buffer for edge cases)
+      final date = expense.date;
+      if (date == null) return false;
+      return date.isAfter(
+            _filterRange!.start.subtract(const Duration(days: 1)),
+          ) &&
+          date.isBefore(_filterRange!.end.add(const Duration(days: 1)));
+    }).toList();
   }
-// Navigate to ExpenseDetailsScreen for editing/viewing
+
+  // Functionality: Navigate to AddExpenseScreen on + tap
+  void _navigateToAddExpense() {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (context) => const AddExpenseScreen()))
+        .then((result) {
+          // Optional: Handle result from AddExpense (e.g., refresh list if new expense added)
+          if (result == true) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Expense added successfully!')),
+            );
+            // Trigger setState to refresh if needed
+            setState(() {});
+          }
+        });
+  }
+
+  // Functionality: Navigate to FilterExpensesScreen and update filter on return
+  void _navigateToFilter() async {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text('Filter applied nooo')));
+    final range = await Navigator.of(context).push<DateTimeRange?>(
+      MaterialPageRoute(
+        builder: (context) => FilterExpensesScreen(initialRange: _filterRange),
+      ),
+    );
+    if (range != null) {
+      setState(() {
+        _filterRange = range;
+      });
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Filter applied: ${DateFormat('MMM yyyy').format(range.start)}',
+          ),
+        ),
+      );
+    }
+  }
+
+  // Navigate to ExpenseDetailsScreen for editing/viewing
   void _onExpenseTap(int index) {
     Navigator.of(context).push(
       MaterialPageRoute(
@@ -101,8 +149,9 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       ),
     );
   }
+
   // Functionality: Handle tap on recent expense (e.g., show dialog with details)
-/*
+  /*
   void _onExpenseTap(Expense expense) {
     showDialog(
       context: context,
@@ -132,59 +181,76 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Expenses', style: TextStyle(
-              fontSize: 20, fontWeight: FontWeight.bold, color: Colors.black),),
-          centerTitle: true,
-        ),
-        floatingActionButton: IconButton(
-            icon: const Icon(Icons.add, color: Colors.blue),
-            onPressed: _navigateToAddExpense,
-            color: Colors.red
-        ),
-        body: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Spending Breakdown Section
-              const Text(
-                'Spending Breakdown',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 16),
-              buildSpendingBreakdown(totalSpent, pieData),
-              const SizedBox(height: 24),
-              // Recent Expenses Section
-              const Text(
-                'Recent Expenses',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
-              ),
-              const SizedBox(height: 16),
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                itemCount: _recentExpenses.length,
-                separatorBuilder: (context, index) =>
-                const SizedBox(height: 12),
-                itemBuilder: (context, index) {
-                  final expense = _recentExpenses[index];
-                  return buildExpenseCard(
-                      expense, () => _onExpenseTap(0));
-                      // expense, () => _onExpenseTap(expense));
-                },
-              ),
-            ],
+      appBar: AppBar(
+        title: const Text(
+          'Expenses',
+          style: TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
           ),
-        )
+        ),
+        centerTitle: true,
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _navigateToAddExpense,
+        backgroundColor: Colors.blue,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        child: const Icon(Icons.add, color: Colors.white),
+      ),
+
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Spending Breakdown Section
+            const Text(
+              'Spending Breakdown',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 16),
+            buildSpendingBreakdown(totalSpent, pieData),
+            const SizedBox(height: 24),
+            // Recent Expenses Section
+            Row(
+              children: [
+                const Text(
+                  'Recent Expenses',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                const Spacer(),
+                IconButton(
+                  icon: Icon(Icons.filter_list, color: Colors.black, size: 26),
+                  onPressed: _navigateToFilter,
+                ),
+                // Icon(Icons.filter_alt, color: Colors.blue,size: 32,),
+                SizedBox(width: 16),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: _recentExpenses.length,
+              separatorBuilder: (context, index) => const SizedBox(height: 12),
+              itemBuilder: (context, index) {
+                final expense = _recentExpenses[index];
+                return buildExpenseCard(expense, () => _onExpenseTap(0));
+                // expense, () => _onExpenseTap(expense));
+              },
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

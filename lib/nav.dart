@@ -1,3 +1,4 @@
+import 'package:expense_tracker/screens/expenses_list_screen.dart';
 import 'package:expense_tracker/screens/filter_screen.dart';
 import 'package:expense_tracker/screens/home_screen.dart';
 import 'package:expense_tracker/screens/profile_screen.dart';
@@ -15,7 +16,7 @@ class NavBar extends StatefulWidget {
 }
 
 class _NavBarState extends State<NavBar> {
-  int _currentIndex = 1; // Start on Stats/Expenses (index 1, as per design focus)
+  int _currentIndex = 0; // Start on Stats/Expenses (index 1, as per design focus)
 
   // List of screens for IndexedStack: 0=Home, 1=Stats/Expenses, 2=Profile
   late final List<Widget> _screens;
@@ -27,7 +28,7 @@ class _NavBarState extends State<NavBar> {
     _screens = [
       const ExpensesScreen(), // Stats/Expenses screen (from previous code)
       // const SummaryScreen(), // Placeholder Home screen
-      const FilterExpensesScreen(), // Placeholder Home screen
+      const ExpensesListScreen(), // Placeholder Home screen
       const ProfileScreen(), // Placeholder Profile screen
 
     ];
