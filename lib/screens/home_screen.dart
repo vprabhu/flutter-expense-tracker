@@ -24,6 +24,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       title: 'Fresh Foods Market',
       category: 'Grocery',
       amount: 75.00,
+      date: DateTime(2025, 10, 1),
       icon: Icons.store,
       color: Colors.blue[300],
       id: '',
@@ -34,6 +35,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       title: 'Gas Station',
       category: 'Gas',
       amount: 45.00,
+      date: DateTime(2025, 10, 2),
       icon: Icons.local_gas_station,
       color: Colors.blue[400],
     ),
@@ -41,6 +43,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       title: 'Cinema',
       category: 'Movie',
       amount: 20.00,
+      date: DateTime(2025, 10, 22),
       icon: Icons.movie,
       color: Colors.blue[200],
     ),
@@ -48,6 +51,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       title: 'Utility Company',
       category: 'Electricity',
       amount: 150.00,
+      date: DateTime(2025, 10, 5),
       icon: Icons.bolt,
       color: Colors.blue[100],
     ),
@@ -55,6 +59,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
       title: 'Fashion Store',
       category: 'Clothing',
       amount: 100.00,
+      date: DateTime(2025, 10, 9),
       icon: Icons.shopping_bag,
       color: Colors.blue[500],
     ),
@@ -111,9 +116,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
 
   // Functionality: Navigate to FilterExpensesScreen and update filter on return
   void _navigateToFilter() async {
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(SnackBar(content: Text('Filter applied nooo')));
     final range = await Navigator.of(context).push<DateTimeRange?>(
       MaterialPageRoute(
         builder: (context) => FilterExpensesScreen(initialRange: _filterRange),

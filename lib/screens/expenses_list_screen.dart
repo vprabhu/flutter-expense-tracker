@@ -1,6 +1,7 @@
 import 'package:expense_tracker/model/expense.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import '../utils/formatters.dart';
 import '../widgets/search_expenses.dart';
 import 'add_expenses_screen.dart';
 import 'expense_details_screen.dart';
@@ -403,7 +404,7 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
 
   // Helper: Build expense card with icon, title, category, amount, formatted date
   Widget _buildExpenseCard(Expense expense, VoidCallback onTap) {
-    final dateStr = _formatDate(expense.date ?? DateTime.now());
+    final dateStr = formatDate(expense.date ?? DateTime.now());
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -462,21 +463,5 @@ class _ExpensesListScreenState extends State<ExpensesListScreen> {
         ),
       ),
     );
-  }
-
-  // Helper: Format date to "Today", "Yesterday", or "MMM dd"
-  String _formatDate(DateTime date) {
-    final now = DateTime.now();
-    if (date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day) {
-      return 'Today';
-    } else if (date.year == now.year &&
-        date.month == now.month &&
-        date.day == now.day - 1) {
-      return 'Yesterday';
-    } else {
-      return DateFormat('MMM dd').format(date);
-    }
   }
 }

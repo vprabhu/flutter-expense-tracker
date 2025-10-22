@@ -1,6 +1,8 @@
 import 'package:expense_tracker/model/expense.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/formatters.dart';
+
 // AddExpenseScreen: Full-screen modal for adding new expense
 // Structure: Form with validation; on Save, return true to parent for refresh
 class AddExpenseScreen extends StatefulWidget {
@@ -16,7 +18,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
   String? _selectedCategory;
-  DateTime? _selectedDate;
+  DateTime? _selectedDate = DateTime.now();
   // File? _receiptImage;
   // Categories for dropdown (matching design data)
   final List<String> _categories = ['Grocery', 'Gas', 'Movie', 'Electricity', 'Clothing'];
@@ -25,7 +27,6 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedDate = DateTime(2025, 10, 18);
   }
 
   // Functionality: Pick date using showDatePicker
@@ -105,6 +106,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                /*const SizedBox(height: 8),
                 // Merchant Field
                 TextFormField(
                   controller: _merchantController,
@@ -113,14 +115,14 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                     border: OutlineInputBorder(),
                   ),
                   validator: (value) => value?.trim().isEmpty ?? true ? 'Please enter merchant' : null,
-                ),
-                const SizedBox(height: 16),
+                ),*/
+                const SizedBox(height: 8),
                 // Amount Field
                 TextFormField(
                   controller: _amountController,
                   keyboardType: TextInputType.numberWithOptions(decimal: true),
                   decoration: const InputDecoration(
-                    prefixText: '\$ ',
+                    prefixText: '\u20B9 ',
                     labelText: 'Amount',
                     border: OutlineInputBorder(),
                   ),
@@ -148,17 +150,22 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 // Date Field
                 TextFormField(
                   readOnly: true,
+                  controller: TextEditingController(text: formatCalendarDate(_selectedDate!)),
+                  style: const TextStyle(color: Colors.black),
                   decoration: InputDecoration(
                     labelText: 'Date',
-                    prefixIcon: const Icon(Icons.calendar_today),
+                    prefixIcon: IconButton(
+                      icon: const Icon(Icons.calendar_today),
+                      onPressed: _pickDate,
+                    ),
+                    // prefixIcon: const Icon(Icons.calendar_today),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.arrow_drop_down),
                       onPressed: _pickDate,
                     ),
                   ),
-                  // controller: TextEditingController(text: DateFormat('MMMM d, yyyy').format(_selectedDate!)),
-                  validator: (value) => _selectedDate == null ? 'Please select a date' : null,
+                  validator: (value) =>  _selectedDate == null ? 'Please select a date' : null,
                 ),
                 const SizedBox(height: 16),
                 // Note Field

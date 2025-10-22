@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import '../core/dummy_data.dart';
 import '../model/expense.dart';
+import '../utils/formatters.dart';
 
 /* ----------------------------------------------------------
    List of recent purchases
    ---------------------------------------------------------- */
 // Helper: Build individual expense card
 Widget buildExpenseCard(Expense expense, VoidCallback onTap) {
+  final dateStr = formatDate(expense.date ?? DateTime.now());
+
   return InkWell(
     onTap: onTap,
     borderRadius: BorderRadius.circular(12),
@@ -49,14 +52,23 @@ Widget buildExpenseCard(Expense expense, VoidCallback onTap) {
                 ],
               ),
             ),
-            // Amount
-            Text(
-              '-\$${expense.amount.toStringAsFixed(2)}',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.black,
-              ),
+            // Amount and Date
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
+              children: [
+                Text(
+                  '-\$${expense.amount.toStringAsFixed(2)}',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black,
+                  ),
+                ),
+                Text(
+                  dateStr,
+                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                ),
+              ],
             ),
           ],
         ),

@@ -29,7 +29,7 @@ class _NavBarState extends State<NavBar> {
       const ExpensesScreen(), // Stats/Expenses screen (from previous code)
       // const SummaryScreen(), // Placeholder Home screen
       const ExpensesListScreen(), // Placeholder Home screen
-      const ProfileScreen(), // Placeholder Profile screen
+      ProfileScreen(), // Placeholder Profile screen
 
     ];
   }
