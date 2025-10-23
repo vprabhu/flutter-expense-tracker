@@ -1,5 +1,8 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
+
+import '../services/auth_service.dart';
 
 // SplashScreen is a StatefulWidget because we use initState and trigger navigation after a delay
 class SplashScreen extends StatefulWidget {
@@ -13,13 +16,35 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    // Run a timer for 2 seconds, then navigate to the login screen
+    _checkLogin();
+
+   /* // Run a timer for 2 seconds, then navigate to the login screen
     Timer(Duration(seconds: 2), () {
       // Use named routing for professional, testable navigation
       Navigator.pushReplacementNamed(context, '/login');
       // Alternatively, for direct widget navigation, use:
       // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
-    });
+    });*/
+  }
+  void _checkLogin() async {
+    final user = FirebaseAuth.instance.currentUser;
+
+    await Future.delayed(Duration(seconds: 1)); // optional splash delay
+
+    final authService = AuthService(); // create instance here
+
+    if (user != null) {
+      Navigator.pushReplacementNamed(
+        context,
+        '/home',
+        arguments: {
+          'user': user,
+          'authService': authService, // pass proper instance
+        },
+      );
+    } else {
+      Navigator.pushReplacementNamed(context, '/login');
+    }
   }
 
   @override

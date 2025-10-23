@@ -172,7 +172,7 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          '${widget.user.displayName ?? 'User'}Expenses',
+          'Expenses',
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.bold,
@@ -180,23 +180,6 @@ class _ExpensesScreenState extends State<ExpensesScreen> {
           ),
         ),
         centerTitle: true,
-        actions: [
-          CircleAvatar(
-            backgroundImage: widget.user.photoURL != null
-                ? NetworkImage(widget.user.photoURL!)
-                : null,
-            child: widget.user.photoURL == null ? Icon(Icons.person) : null,
-          ),
-          IconButton(
-            icon: Icon(Icons.logout, color: Colors.red),
-            tooltip: "Logout",
-            onPressed: () async {
-              await widget.authService.signOut();
-              // Return to login screen. Replace with routing logic as needed.
-              Navigator.of(context).pushReplacementNamed('/');
-            },
-          ),
-        ],
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _navigateToAddExpense,

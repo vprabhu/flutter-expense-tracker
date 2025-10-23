@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:expense_tracker/screens/home_screen.dart';
 import 'package:expense_tracker/services/auth_service.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 /// The login/start screen for the app,
@@ -26,8 +28,10 @@ class _SignInScreenState extends State<SignInScreen> {
     setState(() => isSigningIn = false);
 
     if (user != null) {
+      // **Store user in Firestore**
+      await _storeUserInFirestore(user);
+
       // Navigate to home; prevents going "back" to login.
-      // Navigator.pushReplacementNamed(context, '/home');
       Navigator.pushReplacementNamed(
         context,
         '/home',
@@ -38,6 +42,22 @@ class _SignInScreenState extends State<SignInScreen> {
       );
     } else {
       // Optionally: show a cancel/toast or just silently stay
+    }
+  }
+  Future<void> _storeUserInFirestore(User user) async {
+    final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
+
+    final doc = await userRef.get();
+    if (!doc.exists) {
+      // User does not exist → create new document
+      await userRef.set({
+        'name': user.displayName ?? '',
+        'email': user.email ?? '',
+        'createdAt': FieldValue.serverTimestamp(),
+      });
+      print("User stored in Firestore");
+    } else {
+      print("User already exists in Firestore");
     }
   }
 

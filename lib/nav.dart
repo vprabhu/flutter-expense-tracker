@@ -35,7 +35,7 @@ class _NavBarState extends State<NavBar> {
       // Stats/Expenses screen (from previous code)
       const ExpensesListScreen(),
       // Placeholder Home screen
-      ProfileScreen(),
+      ProfileScreen(authService: widget.authService),
 
       // Placeholder Profile screen
     ];
