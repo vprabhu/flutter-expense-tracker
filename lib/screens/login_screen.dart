@@ -27,8 +27,14 @@ class _SignInScreenState extends State<SignInScreen> {
 
     if (user != null) {
       // Navigate to home; prevents going "back" to login.
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (_) => HomeScreen(user: user, authService: _authService,)),
+      // Navigator.pushReplacementNamed(context, '/home');
+      Navigator.pushReplacementNamed(
+        context,
+        '/home',
+        arguments: {
+          'user': user,               // Your logged-in Firebase user
+          'authService': _authService, // Your AuthService instance
+        },
       );
     } else {
       // Optionally: show a cancel/toast or just silently stay
@@ -70,20 +76,3 @@ class _SignInScreenState extends State<SignInScreen> {
   }
 }
 
-// Placeholder LoginScreen: Simple screen for Login tab
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: Center(
-        child: Text(
-          'Login Screen',
-          textAlign: TextAlign.center,
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w500),
-        ),
-      ),
-    );
-  }
-}

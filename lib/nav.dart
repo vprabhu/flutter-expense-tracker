@@ -2,21 +2,26 @@ import 'package:expense_tracker/screens/expenses_list_screen.dart';
 import 'package:expense_tracker/screens/filter_screen.dart';
 import 'package:expense_tracker/screens/home_screen.dart';
 import 'package:expense_tracker/screens/profile_screen.dart';
-import 'package:expense_tracker/screens/summary_screen.dart';
+import 'package:expense_tracker/services/auth_service.dart';
 import 'package:expense_tracker/widgets/bottom_bar.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 // MainScreen: Handles bottom navigation with IndexedStack for efficient screen switching
 // This structure preserves state across tabs and handles navigation between Home, Stats (Expenses), and Profile
 class NavBar extends StatefulWidget {
-  const NavBar({super.key});
+  final User user; // The authenticated user
+  final AuthService authService; // For seamless logout
+
+  const NavBar({super.key, required this.user, required this.authService});
 
   @override
   State<NavBar> createState() => _NavBarState();
 }
 
 class _NavBarState extends State<NavBar> {
-  int _currentIndex = 0; // Start on Stats/Expenses (index 1, as per design focus)
+  int _currentIndex =
+      0; // Start on Stats/Expenses (index 1, as per design focus)
 
   // List of screens for IndexedStack: 0=Home, 1=Stats/Expenses, 2=Profile
   late final List<Widget> _screens;
@@ -26,11 +31,13 @@ class _NavBarState extends State<NavBar> {
     super.initState();
     // Initialize screens (Home and Profile are placeholders; expand as needed)
     _screens = [
-      const ExpensesScreen(), // Stats/Expenses screen (from previous code)
-      // const SummaryScreen(), // Placeholder Home screen
-      const ExpensesListScreen(), // Placeholder Home screen
-      ProfileScreen(), // Placeholder Profile screen
+      ExpensesScreen(user: widget.user, authService: widget.authService),
+      // Stats/Expenses screen (from previous code)
+      const ExpensesListScreen(),
+      // Placeholder Home screen
+      ProfileScreen(),
 
+      // Placeholder Profile screen
     ];
   }
 
@@ -50,7 +57,8 @@ class _NavBarState extends State<NavBar> {
       ),
       bottomNavigationBar: AppBottomBar(
         currentIndex: _currentIndex,
-        onDestinationSelected: _onDestinationSelected, // Pass callback for handling
+        onDestinationSelected:
+            _onDestinationSelected, // Pass callback for handling
       ),
     );
   }

@@ -7,15 +7,11 @@ import 'package:flutter/material.dart';
 import 'app.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
-// Main entry point for the Expenses app
-void main() {
-  runApp(const ExpensesApp());
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(SmartSpendsApp());
 }
-
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
