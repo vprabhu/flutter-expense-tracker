@@ -2,7 +2,7 @@ import 'dart:developer';
 
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:developer' as dev; // For log(), if not already imported
 
 /// A service class that manages authentication logic for the app,
 /// abstracting all Google Sign-In and Firebase Auth integration.
@@ -10,19 +10,19 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 /// Easily testable, scalable, and plug-and-play with any UI.
 
 class AuthService {
+
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  /// Signs in with Google and stores in Firestore
+
+  /// Signs in with Google (no Firestore storage).
   /// Signs in the user with Google authentication and returns the Firebase [User].
   ///
   /// If the user cancels the sign-in flow, null is returned.
   /// Throws exceptions if network or provider fails.
-  /// Note: Firestore storage is now fire-and-forget to avoid delaying auth completion.
   Future<User?> signInWithGoogleAndStore() async {
+    // Kept method name for compatibility
     final user = await signInWithGoogle();
     if (user != null) {
-      // Fire-and-forget: Store user data in background without awaiting.
-      // This avoids delays on first-time writes while ensuring idempotency.
-      _storeUserInFirestoreAsync(user);
+      // No Firestore storage—auth is complete and user is ready.
       return user;
     }
 
@@ -30,32 +30,8 @@ class AuthService {
     return _auth.authStateChanges().firstWhere((u) => u != null);
   }
 
-  /// Async version of _storeUserInFirestore for fire-and-forget usage.
-  Future<void> _storeUserInFirestoreAsync(User user) async {
-    try {
-      final userRef = FirebaseFirestore.instance.collection('users').doc(user.uid);
-      final doc = await userRef.get();
-      if (!doc.exists) {
-        await userRef.set({
-          'name': user.displayName ?? '',
-          'email': user.email ?? '',
-          'createdAt': FieldValue.serverTimestamp(),
-        });
-      }
-    } catch (e) {
-      // Optional: Log error (e.g., via Firebase Crashlytics) but don't fail auth.
-      log('Failed to store user in Firestore: $e');
-    }
-  }
-
-  // Keep the original for other uses if needed (e.g., awaited elsewhere).
-  Future<void> _storeUserInFirestore(User user) async {
-    await _storeUserInFirestoreAsync(user); // Delegate to async version.
-  }
-
-
   Future<User?> signInWithGoogle() async {
-    log("signInWithGoogle called");
+    dev.log("signInWithGoogle called");
 
     // Trigger the Google Sign-In UI.
     final googleUser = await GoogleSignIn().signIn();
@@ -73,7 +49,7 @@ class AuthService {
     // Sign in to FirebaseAuth with the Google credential.
     final userCredential = await _auth.signInWithCredential(credential);
 
-    log("signInWithGoogle called ${userCredential.user}");
+    dev.log("signInWithGoogle completed: ${userCredential.user}");
     // Return the signed-in Firebase user.
     return userCredential.user;
   }
@@ -83,6 +59,6 @@ class AuthService {
   Future<void> signOut() async {
     await _auth.signOut(); // Signs out from Firebase
     await GoogleSignIn().signOut(); // Disconnects Google account
-    log("signOut called");
+    dev.log("signOut called");
   }
 }

@@ -23,6 +23,35 @@ class _SignInScreenState extends State<SignInScreen> {
       final user = await _authService.signInWithGoogleAndStore();
       setState(() => isSigningIn = false);
       if (user != null && mounted) {
+        // Direct navigation—no post-frame deferral needed.
+        Navigator.pushReplacementNamed(
+          context,
+          '/home',
+          arguments: {'user': user, 'authService': _authService},
+        );
+      } else if (mounted) {
+        // Handle null user (e.g., cancelled sign-in)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Sign-in was cancelled.')));
+      }
+    } catch (e) {
+      setState(() => isSigningIn = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Sign-in failed: ${e.toString()}')),
+        );
+      }
+      log('Sign-in error: $e');
+    }
+  }
+
+  /*  Future<void> _onSignInPressed() async {
+    setState(() => isSigningIn = true);
+    try {
+      final user = await _authService.signInWithGoogleAndStore();
+      setState(() => isSigningIn = false);
+      if (user != null && mounted) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
           Navigator.pushReplacementNamed(
@@ -46,7 +75,7 @@ class _SignInScreenState extends State<SignInScreen> {
       }
       log('Sign-in error: $e');
     }
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
