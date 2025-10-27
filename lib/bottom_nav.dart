@@ -31,7 +31,7 @@ class _NavBarState extends State<NavBar> {
     super.initState();
     // Initialize screens (Home and Profile are placeholders; expand as needed)
     _screens = [
-      ExpensesScreen(user: widget.user, authService: widget.authService),
+      ExpensesScreen(),
       // Stats/Expenses screen (from previous code)
       const ExpensesListScreen(),
       // Placeholder Home screen

@@ -33,16 +33,16 @@ Widget buildSpendingBreakdown(double total, List<PieSegment> data) {
                       shape: BoxShape.circle,
                     ),
                   ),
-                  const Column(
+                  Column(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(
+                      const Text(
                         'Total Spent',
                         style: TextStyle(fontSize: 12, color: Colors.grey),
                       ),
                       Text(
-                        '\$1,250',
-                        style: TextStyle(
+                        '\u20B9${total.toStringAsFixed(2)}',
+                        style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.black87,
