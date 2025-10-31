@@ -20,8 +20,6 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
   DateTime? _startDate;
   DateTime? _endDate;
 
-  final List<String> _monthOptions = ['All', 'Current Month', 'Last Month', 'Custom'];
-
   @override
   void initState() {
     super.initState();
@@ -261,3 +259,4 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
     );
   }
 }
+

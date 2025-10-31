@@ -3,15 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../model/notifiers/add_expense_notifier.dart';
+import '../utils/Constants.dart';
 import '../utils/formatters.dart';
 import '../widgets/expense_card.dart';
 import '../widgets/search_expenses.dart';
 import 'add_expenses_screen.dart';
 import 'expense_details_screen.dart';
 import 'filter_screen.dart';
-
-// Enum for sorting options
-enum SortType { dateDesc, dateAsc, amountDesc, amountAsc }
 
 // ExpensesScreen: Main screen for viewing expenses with category tabs, search, sort, and date filter integration
 // Structure: Displays filtered/sorted/searched list; pie chart removed for this tabbed list focus; navigates from filter apply

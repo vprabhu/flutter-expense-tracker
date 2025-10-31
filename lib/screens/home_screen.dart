@@ -85,10 +85,10 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
         builder: (context) => FilterExpensesScreen(initialRange: _filterRange),
       ),
     );
-    if (range != null) {
       setState(() {
         _filterRange = range;
       });
+    if (range != null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
