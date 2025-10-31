@@ -1,4 +1,5 @@
 import 'package:expense_tracker/model/expense.dart';
+import 'package:expense_tracker/utils/Constants.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -25,15 +26,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   DateTime? _selectedDate = DateTime.now();
 
   // File? _receiptImage;
-  // Categories for dropdown (matching design data)
-  final _categories = [
-    'Food',
-    'Travel',
-    'Shopping',
-    'Entertainment',
-    'Electricity',
-    'Grocery',
-  ];
+
 
   // Functionality: Pick date using showDatePicker
   Future<void> _pickDate() async {
@@ -161,7 +154,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     prefixIcon: Icon(Icons.category),
                     border: OutlineInputBorder(),
                   ),
-                  items: _categories
+                  items: Constants.categories
                       .map(
                         (category) => DropdownMenuItem(
                           value: category,
