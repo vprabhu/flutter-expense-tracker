@@ -62,12 +62,16 @@ class _ExpenseDetailsScreenState extends ConsumerState<ExpenseDetailsScreen> {
 
     if (updated.id == null) return;
     await ref.read(expensesNotifierProvider.notifier).updateExpense(updated.id!, updated);
-    await ref.read(expensesNotifierProvider.notifier).getExpenses(updated.id!);
-
     if (!mounted) return;
     ScaffoldMessenger.of(context)
         .showSnackBar(const SnackBar(content: Text('Saved ✅')));
     setState(() => _isEditing = false);
+    _working = _working.copyWith(
+      amount: double.parse(_amountCtrl.text),
+      category: _selectedCategory!,
+      date: _selectedDate!,
+      note: _noteCtrl.text.trim(),
+    );
   }
 
   /* ----------------------------------------------------------
