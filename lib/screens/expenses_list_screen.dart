@@ -27,17 +27,6 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
   SortType _sortType =
       SortType.dateDesc; // Current sort (date descending by default)
 
-  // Tab categories: Fixed as per design
-  final _tabCategories = [
-    'All',
-    'Food',
-    'Travel',
-    'Shopping',
-    'Entertainment',
-    'Electricity',
-    'Grocery',
-  ];
-
   /* ----------  navigation helpers  ---------- */
   void _navigateToAdd() {
     Navigator.of(
@@ -183,9 +172,7 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
     /*  We no longer need “index” or callbacks – the detail screen
       will read & write straight to Firestore via Riverpod  */
     Navigator.of(context).push(
-      MaterialPageRoute(
-        builder: (_) => ExpenseDetailsScreen(expense: expense),
-      ),
+      MaterialPageRoute(builder: (_) => ExpenseDetailsScreen(expense: expense)),
     );
   }
 
@@ -195,42 +182,6 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Expenses'),
-        /* actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.blue),
-            onPressed: _navigateToFilter, // Date filter navigation
-          ),
-          IconButton(
-            icon: const Icon(Icons.search, color: Colors.blue),
-            onPressed: _showSortDialog, // Search functionality
-          ),
-          PopupMenuButton<SortType>(
-            icon: const Icon(Icons.sort, color: Colors.blue),
-            onSelected: (value) => setState(() => _sortType = value),
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: SortType.dateDesc,
-                child: Text('Date (Newest)'),
-              ),
-              const PopupMenuItem(
-                value: SortType.dateAsc,
-                child: Text('Date (Oldest)'),
-              ),
-              const PopupMenuItem(
-                value: SortType.amountDesc,
-                child: Text('Amount (High)'),
-              ),
-              const PopupMenuItem(
-                value: SortType.amountAsc,
-                child: Text('Amount (Low)'),
-              ),
-            ],
-          ),
-          IconButton(
-            icon: const Icon(Icons.add, color: Colors.blue),
-            onPressed: _navigateToAdd,
-          ),
-        ],*/
         actions: [
           IconButton(
             icon: const Icon(Icons.filter_list, color: Colors.blue),
@@ -254,9 +205,9 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
-              itemCount: _tabCategories.length,
+              itemCount: Constants.tabCategories.length,
               itemBuilder: (context, index) {
-                final category = _tabCategories[index];
+                final category = Constants.tabCategories[index];
                 return Padding(
                   padding: const EdgeInsets.only(right: 8.0),
                   child: ChoiceChip(
@@ -284,18 +235,7 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (_, i) {
                     final exp = filtered[i];
-                    return Dismissible(
-                      key: Key(exp.id!),
-                      background: Container(
-                        color: Colors.red,
-                        alignment: Alignment.centerRight,
-                        padding: const EdgeInsets.only(right: 24),
-                        child: const Icon(Icons.delete, color: Colors.white),
-                      ),
-                      direction: DismissDirection.endToStart,
-                      // confirmDismiss: (_) => _deleteExpense(exp),
-                      child: buildExpenseCard(exp, () => _onExpenseTap(exp)),
-                    );
+                    return  buildExpenseCard(exp, () => _onExpenseTap(exp));
                   },
                 );
               },

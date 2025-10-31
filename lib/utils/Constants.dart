@@ -13,4 +13,14 @@ class Constants {
     'Electricity',
     'Grocery',
   ];
+  // Tab categories: Fixed as per design
+  static const List<String>  tabCategories = [
+    'All',
+    'Food',
+    'Travel',
+    'Shopping',
+    'Entertainment',
+    'Electricity',
+    'Grocery',
+  ];
 }
