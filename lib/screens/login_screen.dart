@@ -1,4 +1,5 @@
 import 'dart:developer';
+import 'package:expense_tracker/models/home_arguments.dart';
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
 
@@ -24,7 +25,7 @@ class _SignInScreenState extends State<SignInScreen> {
         Navigator.pushReplacementNamed(
           context,
           '/home',
-          arguments: {'user': user, 'authService': _authService},
+          arguments: HomeArguments(user, _authService),
         );
       } else if (mounted) {
         // Handle null user (e.g., cancelled sign-in)
@@ -66,9 +67,7 @@ class _SignInScreenState extends State<SignInScreen> {
                   textStyle: const TextStyle(fontSize: 19),
                   padding: const EdgeInsets.symmetric(vertical: 20),
                 ),
-                onPressed: () {
-                  _onSignInPressed();
-                },
+                onPressed: _onSignInPressed,
               ),
             ),
           ),

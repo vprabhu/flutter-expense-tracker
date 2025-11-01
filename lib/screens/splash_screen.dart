@@ -1,3 +1,4 @@
+import 'package:expense_tracker/models/home_arguments.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'dart:async';
@@ -17,19 +18,11 @@ class _SplashScreenState extends State<SplashScreen> {
   void initState() {
     super.initState();
     _checkLogin();
-
-   /* // Run a timer for 2 seconds, then navigate to the login screen
-    Timer(Duration(seconds: 2), () {
-      // Use named routing for professional, testable navigation
-      Navigator.pushReplacementNamed(context, '/login');
-      // Alternatively, for direct widget navigation, use:
-      // Navigator.pushReplacement(context, MaterialPageRoute(builder: (_) => LoginScreen()));
-    });*/
   }
   void _checkLogin() async {
     final user = FirebaseAuth.instance.currentUser;
 
-    await Future.delayed(Duration(seconds: 1)); // optional splash delay
+    await Future.delayed(const Duration(seconds: 1)); // optional splash delay
 
     final authService = AuthService(); // create instance here
 
@@ -37,10 +30,7 @@ class _SplashScreenState extends State<SplashScreen> {
       Navigator.pushReplacementNamed(
         context,
         '/home',
-        arguments: {
-          'user': user,
-          'authService': authService, // pass proper instance
-        },
+        arguments: HomeArguments(user, authService),
       );
     } else {
       Navigator.pushReplacementNamed(context, '/login');
@@ -61,7 +51,7 @@ class _SplashScreenState extends State<SplashScreen> {
               size: 90,
               color: Colors.blue[200], // Pastel blue like your mockup
             ),
-            SizedBox(height: 24), // Gap between logo and text
+            const SizedBox(height: 24), // Gap between logo and text
             // App Name Text (bold, grey, nicely spaced)
             Text(
               'SmartSpends',

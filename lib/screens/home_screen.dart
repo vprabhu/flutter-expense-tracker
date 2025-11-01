@@ -1,13 +1,12 @@
+import 'package:expense_tracker/widgets/expense_list.dart';
 import 'package:flutter/material.dart';
 import '../model/expense.dart';
 import '../model/notifiers/add_expense_notifier.dart';
-import '../widgets/expense_card.dart';
 import '../widgets/pie_chart.dart';
 import '../widgets/spendingBreakdown.dart';
 import 'add_expenses_screen.dart';
 import 'expense_details_screen.dart';
 import 'filter_screen.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 /// HomeScreen displays user financial summary, recent expense list, and a custom logout flow.
@@ -90,27 +89,9 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
       });
     if (range != null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
+        const SnackBar(
           content: Text(
-            'Filter applied: ${DateFormat('MMM yyyy').format(range.start)}',
-          ),
-        ),
-      );
-    }
-  }
-  Future<void> _filterByDate() async {
-    final range = await showDateRangePicker(
-      context: context,
-      initialDateRange: _filterRange,
-      firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
-    );
-    if (range != null) {
-      setState(() => _filterRange = range);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Filter: ${DateFormat.yMMMd().format(range.start)} - ${DateFormat.yMMMd().format(range.end)}',
+            'Filter applied',
           ),
         ),
       );
@@ -183,19 +164,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-                if (recent.isEmpty)
-                  const Center(child: Text('No expenses for this period'))
-                else
-                  ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: recent.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: 12),
-                    itemBuilder: (_, i) => buildExpenseCard(
-                      recent[i],
-                      () => _onExpenseTap(recent[i]),
-                    ),
-                  ),
+                ExpenseList(expenses: recent, onExpenseTap: _onExpenseTap),
               ],
             ),
           );
@@ -204,5 +173,3 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
     );
   }
 }
-
-
