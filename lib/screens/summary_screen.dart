@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 
-// Placeholder HomeScreen: Simple screen for Home tab (expand with dashboard content)
+/// A placeholder screen for the home tab.
+///
+/// This screen is intended to be expanded with a dashboard that provides a
+/// summary of the user's expenses.
 class SummaryScreen extends StatelessWidget {
   const SummaryScreen({super.key});
 

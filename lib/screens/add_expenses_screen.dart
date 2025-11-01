@@ -1,15 +1,16 @@
 import 'package:expense_tracker/model/expense.dart';
 import 'package:expense_tracker/utils/Constants.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_core/firebase_core.dart';
-import '../repo/expense_repository.dart';
+import 'package:expense_tracker/model/notifiers/add_expense_notifier.dart';
+
 import '../utils/formatters.dart';
 
-// AddExpenseScreen: Full-screen modal for adding new expense
-// Structure: Form with validation; on Save, return true to parent for refresh
+/// A full-screen modal for adding a new expense.
+///
+/// This screen provides a form with fields for the expense title, amount,
+/// category, date, and an optional note. It includes form validation and handles
+/// the logic for saving the new expense to the database.
 class AddExpenseScreen extends ConsumerStatefulWidget {
   const AddExpenseScreen({super.key});
 
@@ -18,17 +19,18 @@ class AddExpenseScreen extends ConsumerStatefulWidget {
 }
 
 class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
+  // A global key for the form, used to validate the form fields.
   final _formKey = GlobalKey<FormState>();
-  final _merchantController = TextEditingController();
+  // Text editing controllers for the form fields.
+  final _titleController = TextEditingController();
   final _amountController = TextEditingController();
   final _noteController = TextEditingController();
+  // The currently selected category for the expense.
   String? _selectedCategory;
+  // The currently selected date for the expense.
   DateTime? _selectedDate = DateTime.now();
 
-  // File? _receiptImage;
-
-
-  // Functionality: Pick date using showDatePicker
+  /// Displays a date picker and updates the `_selectedDate`.
   Future<void> _pickDate() async {
     final date = await showDatePicker(
       context: context,
@@ -43,66 +45,55 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
     }
   }
 
-  // Functionality: Upload receipt - simulate with image picker
-  /*  Future<void> _uploadReceipt() async {
-    final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _receiptImage = File(pickedFile.path);
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Receipt uploaded!')),
-      );
-    }
-  }*/
-
-  // Functionality: Save expense - validate form, then pop with success
+  /// Saves the new expense to the database.
+  ///
+  /// This method first validates the form. If the form is valid, it creates a
+  /// new [Expense] object and calls the `addExpense` method on the
+  /// [ExpensesNotifier]. It also provides user feedback through SnackBars.
   Future<void> _saveExpense() async {
+    // Validate the form. If it's not valid, do nothing.
     if (!_formKey.currentState!.validate()) return;
 
+    // Create a new Expense object from the form data.
     final newExpense = Expense(
-      title: _merchantController.text.trim(),
+      title: _titleController.text.trim(),
       category: _selectedCategory!,
       amount: double.parse(_amountController.text),
-      icon: Icons.shopping_bag,
-      color: Colors.blue[300],
+      icon: Icons.shopping_bag, // A default icon.
+      color: Colors.blue[300], // A default color.
       date: _selectedDate!,
       note: _noteController.text.trim(),
     );
 
-    /* Show progress indicator while async call runs */
+    // Show a progress indicator while the expense is being saved.
     final navigator = Navigator.of(context);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Saving…')));
+    ScaffoldMessenger.of(context)
+        .showSnackBar(const SnackBar(content: Text('Saving…')));
 
-    final saved = await ref
-        .read(expensesNotifierProvider.notifier)
-        .addExpense(newExpense);
+    // Call the addExpense method on the notifier to save the expense.
+    final saved = await ref.read(expensesNotifierProvider.notifier).addExpense(newExpense);
 
+    // Provide feedback to the user based on whether the save was successful.
     if (saved != null) {
-      navigator.pop(); // close add screen
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Expense saved!')));
+      navigator.pop(); // Close the add expense screen.
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Expense saved!')));
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(const SnackBar(content: Text('Failed to save')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('Failed to save')));
     }
   }
 
-  // Functionality: Cancel - pop without saving
+  /// A callback function to cancel the process and close the screen.
   void _cancel() => Navigator.of(context).pop();
 
-  /* ----------------  UI  ---------------- */
-
+  // The build method describes the part of the user interface represented by this widget.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Add Expense'),
+        // A close button to dismiss the screen.
         leading: IconButton(
           icon: const Icon(Icons.close, color: Colors.grey),
           onPressed: _cancel,
@@ -116,23 +107,23 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                /*const SizedBox(height: 8),
-                // Merchant Field
+                // A text field for the expense title.
                 TextFormField(
-                  controller: _merchantController,
+                  controller: _titleController,
                   decoration: const InputDecoration(
-                    labelText: 'Merchant',
+                    labelText: 'Title',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => value?.trim().isEmpty ?? true ? 'Please enter merchant' : null,
-                ),*/
-                const SizedBox(height: 8),
-                // Amount Field
+                  validator: (value) =>
+                      value?.trim().isEmpty ?? true ? 'Please enter a title' : null,
+                ),
+                const SizedBox(height: 16),
+                // A text field for the expense amount.
                 TextFormField(
                   controller: _amountController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: const InputDecoration(
-                    prefixText: '\u20B9 ',
+                    prefixText: '\u20B9 ', // The Indian Rupee symbol.
                     labelText: 'Amount',
                     border: OutlineInputBorder(),
                   ),
@@ -146,7 +137,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                   },
                 ),
                 const SizedBox(height: 16),
-                // Category Dropdown
+                // A dropdown to select the expense category.
                 DropdownButtonFormField<String>(
                   value: _selectedCategory,
                   decoration: const InputDecoration(
@@ -162,16 +153,16 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                         ),
                       )
                       .toList(),
-                  onChanged: (value) =>
-                      setState(() => _selectedCategory = value),
+                  onChanged: (value) => setState(() => _selectedCategory = value),
                   validator: (value) =>
                       value == null ? 'Please select a category' : null,
                 ),
                 const SizedBox(height: 16),
-                // Date Field
+                // A text field to display the selected date.
                 TextFormField(
                   readOnly: true,
                   controller: TextEditingController(
+                    // Format the date for display.
                     text: formatCalendarDate(_selectedDate!),
                   ),
                   style: const TextStyle(color: Colors.black),
@@ -181,7 +172,6 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                       icon: const Icon(Icons.calendar_today),
                       onPressed: _pickDate,
                     ),
-                    // prefixIcon: const Icon(Icons.calendar_today),
                     border: const OutlineInputBorder(),
                     suffixIcon: IconButton(
                       icon: const Icon(Icons.arrow_drop_down),
@@ -192,7 +182,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                       _selectedDate == null ? 'Please select a date' : null,
                 ),
                 const SizedBox(height: 16),
-                // Note Field
+                // A text field for an optional note.
                 TextFormField(
                   controller: _noteController,
                   maxLines: 3,
@@ -200,12 +190,11 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                     labelText: 'Note',
                     border: OutlineInputBorder(),
                   ),
-                  validator: (value) => value?.trim().isEmpty ?? true
-                      ? 'Please add a note'
-                      : null,
+                  validator: (value) =>
+                      value?.trim().isEmpty ?? true ? 'Please add a note' : null,
                 ),
                 const SizedBox(height: 24),
-                // Upload Receipt Card
+                // A card for uploading a receipt.
                 Card(
                   child: Padding(
                     padding: const EdgeInsets.all(16.0),
@@ -230,22 +219,12 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                           style: TextStyle(color: Colors.grey),
                         ),
                         const SizedBox(height: 16),
-                        // ElevatedButton.icon(
-                        //   onPressed: _uploadReceipt,
-                        //   icon: const Icon(Icons.upload, size: 18),
-                        //   label: const Text('Upload'),
-                        //   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[50]),
-                        // ),
-                        // if (_receiptImage != null) ...[
-                        //   const SizedBox(height: 8),
-                        //   Text('Image selected: ${_receiptImage!.path.split('/').last}'),
-                        // ],
                       ],
                     ),
                   ),
                 ),
                 const SizedBox(height: 24),
-                // Bottom Buttons
+                // The cancel and save buttons.
                 Row(
                   children: [
                     Expanded(
@@ -281,9 +260,10 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
     );
   }
 
+  // Dispose of the text editing controllers when the widget is removed from the widget tree.
   @override
   void dispose() {
-    _merchantController.dispose();
+    _titleController.dispose();
     _amountController.dispose();
     _noteController.dispose();
     super.dispose();

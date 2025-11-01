@@ -1,49 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
-// FilterExpensesScreen: Modal for filtering expenses by month or custom date range
-// Structure: Segmented buttons for quick months, conditional date pickers for custom, applies DateTimeRange
+/// A screen that allows the user to filter expenses by month or a custom date range.
 class FilterExpensesScreen extends StatefulWidget {
+  /// The initial date range to display.
   final DateTimeRange? initialRange;
 
-  const FilterExpensesScreen({
-    super.key,
-    this.initialRange,
-  });
+  const FilterExpensesScreen({super.key, this.initialRange});
 
   @override
   State<FilterExpensesScreen> createState() => _FilterExpensesScreenState();
 }
 
 class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
-  String _selectedMonth = 'Current Month'; // Initial selection
+  // The currently selected month filter.
+  String _selectedMonth = 'Current Month';
+  // A boolean to show or hide the custom date range pickers.
   bool _showCustom = false;
+  // The start and end dates for the custom date range.
   DateTime? _startDate;
   DateTime? _endDate;
 
   @override
   void initState() {
     super.initState();
-    // Restore initial state if provided
+    // If an initial date range is provided, restore the state.
     if (widget.initialRange != null) {
       _startDate = widget.initialRange!.start;
       _endDate = widget.initialRange!.end;
       _selectedMonth = 'Custom';
       _showCustom = true;
     } else {
-      // Default to current month
+      // Otherwise, default to the current month.
       final now = DateTime.now();
       _startDate = DateTime(now.year, now.month, 1);
       _endDate = DateTime(now.year, now.month + 1, 0);
     }
   }
 
-  // Functionality: Handle month selection - toggle custom date range visibility
+  /// A callback function that is called when a month is selected.
   void _onMonthSelected(String value) {
     setState(() {
       _selectedMonth = value;
       _showCustom = value == 'Custom';
+      // If the user selects "Custom" and no date range is set, default to the current month.
       if (value == 'Custom' && _startDate == null) {
-        // Default to current month for custom
         final now = DateTime.now();
         _startDate = DateTime(now.year, now.month, 1);
         _endDate = DateTime(now.year, now.month + 1, 0);
@@ -51,7 +52,7 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
     });
   }
 
-  // Functionality: Select start date
+  /// Shows a date picker to allow the user to select a start date.
   Future<void> _selectStartDate() async {
     final picked = await showDatePicker(
       context: context,
@@ -64,7 +65,7 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
     }
   }
 
-  // Functionality: Select end date (ensure >= start)
+  /// Shows a date picker to allow the user to select an end date.
   Future<void> _selectEndDate() async {
     final initial = _endDate ?? DateTime.now();
     final picked = await showDatePicker(
@@ -78,35 +79,42 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
     }
   }
 
-  // Functionality: Compute and apply filter range based on selection, then pop
+  /// Applies the selected filters and returns the date range to the previous screen.
   void _applyFilters() {
     DateTimeRange? range;
     final now = DateTime.now();
+
+    // Calculate the date range based on the selected month.
     switch (_selectedMonth) {
       case 'All':
-        range = null; // Clear filter
+        range = null; // No filter.
         break;
       case 'Current Month':
-        final currentStart = DateTime(now.year, now.month, 1);
-        final currentEnd = DateTime(now.year, now.month + 1, 0);
-        range = DateTimeRange(start: currentStart, end: currentEnd);
+        range = DateTimeRange(
+          start: DateTime(now.year, now.month, 1),
+          end: DateTime(now.year, now.month + 1, 0),
+        );
         break;
       case 'Last Month':
         final lastMonth = now.month == 1 ? DateTime(now.year - 1, 12, 1) : DateTime(now.year, now.month - 1, 1);
-        final lastEnd = DateTime(lastMonth.year, lastMonth.month + 1, 0);
-        range = DateTimeRange(start: lastMonth, end: lastEnd);
+        range = DateTimeRange(
+          start: lastMonth,
+          end: DateTime(lastMonth.year, lastMonth.month + 1, 0),
+        );
         break;
       case 'Custom':
+        // For custom ranges, ensure the start date is before the end date.
         if (_startDate != null && _endDate != null && _startDate!.isBefore(_endDate!.add(const Duration(days: 1)))) {
           range = DateTimeRange(start: _startDate!, end: _endDate!);
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please select valid start and end dates')),
+            const SnackBar(content: Text('Please select a valid start and end date')),
           );
           return;
         }
         break;
     }
+    // Return the selected date range to the previous screen.
     Navigator.of(context).pop(range);
   }
 
@@ -125,24 +133,18 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Month Selection Section
-            const Text(
-              'Month',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-            ),
+            // The month selection buttons.
+            const Text('Month', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
             const SizedBox(height: 12),
             _buildMonthSegment(),
-            // Conditional Date Range for Custom
+            // The custom date range pickers, which are only shown when "Custom" is selected.
             if (_showCustom) ...[
               const SizedBox(height: 24),
-              const Text(
-                'Date Range',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-              ),
+              const Text('Date Range', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
               const SizedBox(height: 12),
               Row(
                 children: [
-                  // Start Date Picker
+                  // The start date picker.
                   Expanded(
                     child: TextFormField(
                       readOnly: true,
@@ -152,14 +154,13 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
                         border: OutlineInputBorder(),
                       ),
                       controller: TextEditingController(
-                        text: _startDate != null ? _startDate!.toString() : 'Select Date',
-                        // text: _startDate != null ? DateFormat('MMM d, yyyy').format(_startDate!) : 'Select Date',
+                        text: _startDate != null ? DateFormat('MMM d, yyyy').format(_startDate!) : 'Select Date',
                       ),
                       onTap: _selectStartDate,
                     ),
                   ),
                   const SizedBox(width: 16),
-                  // End Date Picker
+                  // The end date picker.
                   Expanded(
                     child: TextFormField(
                       readOnly: true,
@@ -169,8 +170,7 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
                         border: OutlineInputBorder(),
                       ),
                       controller: TextEditingController(
-                        text: _endDate != null ? _endDate!.toString() : 'Select Date',
-                        // text: _endDate != null ? DateFormat('MMM d, yyyy').format(_endDate!) : 'Select Date',
+                        text: _endDate != null ? DateFormat('MMM d, yyyy').format(_endDate!) : 'Select Date',
                       ),
                       onTap: _selectEndDate,
                     ),
@@ -179,7 +179,7 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
               ),
             ],
             const Spacer(),
-            // Apply Button
+            // The apply filters button.
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
@@ -199,40 +199,30 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
     );
   }
 
-  // Helper: Build segmented month buttons in two rows
+  /// A helper method to build the segmented month buttons.
   Widget _buildMonthSegment() {
     return Column(
       children: [
-        // First row: All | Current Month
         Row(
           children: [
-            Expanded(
-              child: _buildMonthButton('All', _selectedMonth == 'All'),
-            ),
+            Expanded(child: _buildMonthButton('All', _selectedMonth == 'All')),
             const SizedBox(width: 8),
-            Expanded(
-              child: _buildMonthButton('Current Month', _selectedMonth == 'Current Month'),
-            ),
+            Expanded(child: _buildMonthButton('Current Month', _selectedMonth == 'Current Month')),
           ],
         ),
         const SizedBox(height: 8),
-        // Second row: Last Month | Custom
         Row(
           children: [
-            Expanded(
-              child: _buildMonthButton('Last Month', _selectedMonth == 'Last Month'),
-            ),
+            Expanded(child: _buildMonthButton('Last Month', _selectedMonth == 'Last Month')),
             const SizedBox(width: 8),
-            Expanded(
-              child: _buildMonthButton('Custom', _selectedMonth == 'Custom'),
-            ),
+            Expanded(child: _buildMonthButton('Custom', _selectedMonth == 'Custom')),
           ],
         ),
       ],
     );
   }
 
-  // Helper: Build individual month button (chip-like)
+  /// A helper method to build a single month button.
   Widget _buildMonthButton(String label, bool selected) {
     return GestureDetector(
       onTap: () => _onMonthSelected(label),
@@ -259,4 +249,3 @@ class _FilterExpensesScreenState extends State<FilterExpensesScreen> {
     );
   }
 }
-

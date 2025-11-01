@@ -4,15 +4,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../model/notifiers/add_expense_notifier.dart';
 import '../utils/Constants.dart';
-import '../utils/formatters.dart';
 import '../widgets/expense_card.dart';
-import '../widgets/search_expenses.dart';
 import 'add_expenses_screen.dart';
 import 'expense_details_screen.dart';
-import 'filter_screen.dart';
 
-// ExpensesScreen: Main screen for viewing expenses with category tabs, search, sort, and date filter integration
-// Structure: Displays filtered/sorted/searched list; pie chart removed for this tabbed list focus; navigates from filter apply
+/// The main screen for viewing, filtering, and sorting expenses.
+///
+/// This screen displays a list of expenses with tabs for filtering by category.
+/// It also provides options for sorting, searching, and filtering by date.
 class ExpensesListScreen extends ConsumerStatefulWidget {
   const ExpensesListScreen({super.key});
 
@@ -21,20 +20,21 @@ class ExpensesListScreen extends ConsumerStatefulWidget {
 }
 
 class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
-  DateTimeRange? _filterRange; // Date filter from FilterScreen
-  String _selectedCategory = 'All'; // Selected tab category
-  String _searchQuery = ''; // Current search query
-  SortType _sortType =
-      SortType.dateDesc; // Current sort (date descending by default)
+  // The currently selected date range for filtering.
+  DateTimeRange? _filterRange;
+  // The currently selected category for filtering.
+  String _selectedCategory = 'All';
+  // The current search query.
+  String _searchQuery = '';
+  // The current sort type.
+  SortType _sortType = SortType.dateDesc;
 
-  /* ----------  navigation helpers  ---------- */
+  /// Navigates to the screen for adding a new expense.
   void _navigateToAdd() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => const AddExpenseScreen()));
-    /* When we save, notifier will emit new list → UI auto updates */
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => const AddExpenseScreen()));
   }
 
+  /// Shows a date range picker to allow the user to filter expenses by date.
   Future<void> _navigateToFilter() async {
     final range = await showDateRangePicker(
       context: context,
@@ -46,14 +46,13 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
       setState(() => _filterRange = range);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(
-            'Filter: ${DateFormat.yMMMd().format(range.start)} - ${DateFormat.yMMMd().format(range.end)}',
-          ),
+          content: Text('Filter: ${DateFormat.yMMMd().format(range.start)} - ${DateFormat.yMMMd().format(range.end)}'),
         ),
       );
     }
   }
 
+  /// Shows a dialog to allow the user to choose a sort order.
   void _showSortDialog() {
     showDialog(
       context: context,
@@ -64,14 +63,12 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
           children: SortType.values
               .map(
                 (e) => RadioListTile<SortType>(
-                  title: Text(
-                    {
-                      SortType.dateDesc: 'Date (newest)',
-                      SortType.dateAsc: 'Date (oldest)',
-                      SortType.amountDesc: 'Amount (high)',
-                      SortType.amountAsc: 'Amount (low)',
-                    }[e]!,
-                  ),
+                  title: Text({
+                    SortType.dateDesc: 'Date (newest)',
+                    SortType.dateAsc: 'Date (oldest)',
+                    SortType.amountDesc: 'Amount (high)',
+                    SortType.amountAsc: 'Amount (low)',
+                  }[e]!),
                   value: e,
                   groupValue: _sortType,
                   onChanged: (v) {
@@ -86,7 +83,7 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
     );
   }
 
-  /* ----------  delete with confirmation  ---------- */
+  /// Deletes an expense after showing a confirmation dialog.
   Future<void> _deleteExpense(Expense exp) async {
     final ok = await showDialog<bool>(
       context: context,
@@ -94,83 +91,56 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
         title: const Text('Delete?'),
         content: Text('Delete "${exp.title}"?'),
         actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.pop(context, true),
-            child: const Text('Delete'),
-          ),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
         ],
       ),
     );
     if (ok != true) return;
 
     await ref.read(expensesNotifierProvider.notifier).deleteExpense(exp.id!);
-    ScaffoldMessenger.of(
-      context,
-    ).showSnackBar(const SnackBar(content: Text('Deleted')));
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Deleted')));
   }
 
-  /* ----------  filtering & sorting  ---------- */
+  /// Filters and sorts the list of expenses based on the current filters and sort order.
   List<Expense> _filterAndSort(List<Expense> source) {
     var list = source.where((e) {
-      if (_filterRange != null) {
-        final start = _filterRange!.start;
-        final end = _filterRange!.end;
-        if (e.date == null || e.date!.isBefore(start) || e.date!.isAfter(end)) {
-          return false;
-        }
-      }
-      if (_selectedCategory != 'All' && e.category != _selectedCategory)
-        return false;
-      if (_searchQuery.isNotEmpty) {
-        final q = _searchQuery.toLowerCase();
-        return e.title.toLowerCase().contains(q) ||
-            (e.note?.toLowerCase().contains(q) ?? false);
-      }
-      return true;
+      final inDateRange = _filterRange == null ||
+          (e.date.isAfter(_filterRange!.start) && e.date.isBefore(_filterRange!.end));
+      final inCategory = _selectedCategory == 'All' || e.category == _selectedCategory;
+      final inSearch = _searchQuery.isEmpty ||
+          e.title.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          (e.note?.toLowerCase().contains(_searchQuery.toLowerCase()) ?? false);
+
+      return inDateRange && inCategory && inSearch;
     }).toList();
 
-    switch (_sortType) {
-      //Option 1: Put null dates at the bottom
-      case SortType.dateDesc:
-        list.sort((a, b) {
-          if (a.date == null) return 1;
-          if (b.date == null) return -1;
-          return b.date!.compareTo(a.date!);
-        });
-        break;
+    // Sort the list based on the selected sort type.
+    list.sort((a, b) {
+      switch (_sortType) {
+        case SortType.dateDesc:
+          return b.date.compareTo(a.date);
+        case SortType.dateAsc:
+          return a.date.compareTo(b.date);
+        case SortType.amountDesc:
+          return b.amount.compareTo(a.amount);
+        case SortType.amountAsc:
+          return a.amount.compareTo(b.amount);
+      }
+    });
 
-      case SortType.dateAsc:
-        list.sort((a, b) {
-          if (a.date == null) return 1;
-          if (b.date == null) return -1;
-          return a.date!.compareTo(b.date!);
-        });
-        break;
-      case SortType.amountDesc:
-        list.sort((a, b) => b.amount.compareTo(a.amount));
-        break;
-      case SortType.amountAsc:
-        list.sort((a, b) => a.amount.compareTo(b.amount));
-        break;
-    }
     return list;
   }
 
-  // Functionality: Handle category tab selection
+  /// A callback function that is called when a category tab is selected.
   void _onCategorySelected(String category) {
     setState(() {
       _selectedCategory = category;
     });
   }
 
-  // Functionality: Navigate to details for editing
+  /// Navigates to the expense details screen when an expense is tapped.
   void _onExpenseTap(Expense expense) {
-    /*  We no longer need “index” or callbacks – the detail screen
-      will read & write straight to Firestore via Riverpod  */
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => ExpenseDetailsScreen(expense: expense)),
     );
@@ -199,10 +169,9 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
       ),
       body: Column(
         children: [
-          // Category Tabs/Chips
-          Container(
+          // The category filter tabs.
+          SizedBox(
             height: 50,
-            padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: ListView.builder(
               scrollDirection: Axis.horizontal,
               itemCount: Constants.tabCategories.length,
@@ -221,21 +190,21 @@ class _ExpensesListScreenState extends ConsumerState<ExpensesListScreen> {
               },
             ),
           ),
+          // The list of expenses.
           Expanded(
             child: asyncExpenses.when(
               loading: () => const Center(child: CircularProgressIndicator()),
               error: (err, __) => Center(child: Text('Error: $err')),
               data: (raw) {
                 final filtered = _filterAndSort(raw);
-                if (filtered.isEmpty)
-                  return const Center(child: Text('No expenses'));
+                if (filtered.isEmpty) return const Center(child: Text('No expenses'));
                 return ListView.separated(
                   padding: const EdgeInsets.all(16),
                   itemCount: filtered.length,
                   separatorBuilder: (_, __) => const SizedBox(height: 12),
                   itemBuilder: (_, i) {
                     final exp = filtered[i];
-                    return  buildExpenseCard(exp, () => _onExpenseTap(exp));
+                    return buildExpenseCard(exp, () => _onExpenseTap(exp));
                   },
                 );
               },

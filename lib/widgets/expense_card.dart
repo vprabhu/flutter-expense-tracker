@@ -2,13 +2,16 @@ import 'package:flutter/material.dart';
 import '../model/expense.dart';
 import '../utils/formatters.dart';
 
-/* ----------------------------------------------------------
-   List of recent purchases
-   ---------------------------------------------------------- */
-// Helper: Build individual expense card
+/// A widget that displays a single expense in a card format.
+///
+/// This widget is used to display a summary of an expense, including its icon,
+/// title, category, amount, and date. It also handles tap events to allow the
+/// user to view the full details of the expense.
 Widget buildExpenseCard(Expense expense, VoidCallback onTap) {
-  final dateStr = formatDate(expense.date ?? DateTime.now());
+  // Format the date to be displayed in a user-friendly format.
+  final dateStr = formatDate(expense.date);
 
+  // An InkWell widget provides the ripple effect when the card is tapped.
   return InkWell(
     onTap: onTap,
     borderRadius: BorderRadius.circular(12),
@@ -17,7 +20,7 @@ Widget buildExpenseCard(Expense expense, VoidCallback onTap) {
         padding: const EdgeInsets.all(16.0),
         child: Row(
           children: [
-            // Icon with color
+            // The expense icon, displayed in a colored circle.
             CircleAvatar(
               backgroundColor: expense.color,
               radius: 20,
@@ -28,7 +31,7 @@ Widget buildExpenseCard(Expense expense, VoidCallback onTap) {
               ),
             ),
             const SizedBox(width: 12),
-            // Title and Category
+            // The expense title and category.
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -43,7 +46,7 @@ Widget buildExpenseCard(Expense expense, VoidCallback onTap) {
                   ),
                   Text(
                     expense.category,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 14,
                       color: Colors.grey,
                     ),
@@ -51,12 +54,12 @@ Widget buildExpenseCard(Expense expense, VoidCallback onTap) {
                 ],
               ),
             ),
-            // Amount and Date
+            // The expense amount and date.
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  '- \$${expense.amount.toStringAsFixed(2)}',
+                  '- \u20B9${expense.amount.toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.bold,
@@ -65,70 +68,7 @@ Widget buildExpenseCard(Expense expense, VoidCallback onTap) {
                 ),
                 Text(
                   dateStr,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-// Helper: Build expense card with icon, title, category, amount, formatted date
-Widget _buildExpenseCard(Expense expense, VoidCallback onTap) {
-  final dateStr = formatDate(expense.date ?? DateTime.now());
-  return InkWell(
-    onTap: onTap,
-    borderRadius: BorderRadius.circular(12),
-    child: Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            // Icon in light blue circle
-            CircleAvatar(
-              backgroundColor: Colors.blue[100],
-              radius: 20,
-              child: Icon(expense.icon, color: Colors.blue, size: 20),
-            ),
-            const SizedBox(width: 12),
-            // Title and Category
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    expense.title,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.black87,
-                    ),
-                  ),
-                  Text(
-                    expense.note ?? "$expense.category", // Category label
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
-                  ),
-                ],
-              ),
-            ),
-            // Amount and Date
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Text(
-                  '-\$${expense.amount.toStringAsFixed(2)}',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red,
-                  ),
-                ),
-                Text(
-                  dateStr,
-                  style: TextStyle(fontSize: 12, color: Colors.grey),
+                  style: const TextStyle(fontSize: 12, color: Colors.grey),
                 ),
               ],
             ),
