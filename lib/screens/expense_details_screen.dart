@@ -440,147 +440,145 @@ class _ExpenseDetailsScreenState extends ConsumerState<ExpenseDetailsScreen> {
             'Receipt Image',
             style: TextStyle(fontWeight: FontWeight.w500),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 24),
           // Single image slot that overrides based on state
           Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-
-          ],
-          ),
-          Stack(
-            children: [
-              // Determine and show the active image with optional loading overlay
-              Builder(
-                builder: (context) {
-                  Widget imageWidget;
-                  if (_editedReceiptUrl != null) {
-                    // New uploaded
-                    imageWidget = Image.network(
-                      _editedReceiptUrl!,
-                      height: 150,
-
-                      fit: BoxFit.cover,
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const Center(child: CircularProgressIndicator());
-                      },
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        height: 150,
-
-                        color: Colors.grey[200],
-                        child: const Center(child: Text('Error loading image')),
-                      ),
-                    );
-                  } else if (_editedReceiptImage != null) {
-                    // Local preview with upload overlay
-                    imageWidget = Stack(
-                      children: [
-                        Image.file(
-                          _editedReceiptImage!,
-                          height: 150,
-                          fit: BoxFit.cover,
-                        ),
-                        // Upload progress overlay
-                        if (_isUploadingImage)
-                          Container(
-                            height: 150,
-                            color: Colors.black26,
-                            child: const Center(
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  CircularProgressIndicator(
-                                    color: Colors.white,
-                                  ),
-                                  SizedBox(height: 8),
-                                  Text(
-                                    'Uploading...',
-                                    style: TextStyle(color: Colors.white),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                      ],
-                    );
-                  } else if (_working.imagePath != null &&
-                      _working.imagePath!.isNotEmpty) {
-                    // Original
-                    imageWidget = ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.network(
-                        _working.imagePath!,
+            Stack(
+              children: [
+                // Determine and show the active image with optional loading overlay
+                Builder(
+                  builder: (context) {
+                    Widget imageWidget;
+                    if (_editedReceiptUrl != null) {
+                      // New uploaded
+                      imageWidget = Image.network(
+                        _editedReceiptUrl!,
                         height: 150,
                         fit: BoxFit.cover,
                         loadingBuilder: (context, child, loadingProgress) {
                           if (loadingProgress == null) return child;
-                          return const Center(
-                            child: CircularProgressIndicator(),
-                          );
+                          return const Center(child: CircularProgressIndicator());
                         },
                         errorBuilder: (context, error, stackTrace) => Container(
                           height: 150,
 
                           color: Colors.grey[200],
-                          child: const Center(
-                            child: Text('Error loading original image'),
+                          child: const Center(child: Text('Error loading image')),
+                        ),
+                      );
+                    } else if (_editedReceiptImage != null) {
+                      // Local preview with upload overlay
+                      imageWidget = Stack(
+                        children: [
+                          Image.file(
+                            _editedReceiptImage!,
+                            height: 150,
+                            fit: BoxFit.cover,
+                          ),
+                          // Upload progress overlay
+                          if (_isUploadingImage)
+                            Container(
+                              height: 150,
+                              color: Colors.black26,
+                              child: const Center(
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    CircularProgressIndicator(
+                                      color: Colors.white,
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'Uploading...',
+                                      style: TextStyle(color: Colors.white),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                        ],
+                      );
+                    } else if (_working.imagePath != null &&
+                        _working.imagePath!.isNotEmpty) {
+                      // Original
+                      imageWidget = ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: Image.network(
+                          _working.imagePath!,
+                          height: 150,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return const Center(
+                              child: CircularProgressIndicator(),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            height: 150,
+
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Text('Error loading original image'),
+                            ),
                           ),
                         ),
-                      ),
-                    );
-                  } else {
-                    // Placeholder
-                    imageWidget = Container(
-                      height: 150,
-                      decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey),
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.grey[50],
-                      ),
-                      child: const Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(
-                              Icons.add_a_photo,
-                              size: 48,
-                              color: Colors.grey,
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              'No image',
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ],
+                      );
+                    } else {
+                      // Placeholder
+                      imageWidget = Container(
+                        height: 150,
+                        decoration: BoxDecoration(
+                          border: Border.all(color: Colors.grey),
+                          borderRadius: BorderRadius.circular(8),
+                          color: Colors.grey[50],
                         ),
-                      ),
-                    );
-                  }
-                  return imageWidget;
-                },
-              ),
-            ],
-          ),
+                        child: const Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.add_a_photo,
+                                size: 48,
+                                color: Colors.grey,
+                              ),
+                              SizedBox(height: 8),
+                              Text(
+                                'No image',
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }
+                    return imageWidget;
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(width: 12),
 
-          const SizedBox(height: 12),
-          // Retake button - always visible to trigger picker/upload
-          ElevatedButton.icon(
-            onPressed: _updateReceiptImage,
-            icon: const Icon(Icons.camera_alt_outlined),
-            label: Text(
-              (_editedReceiptUrl != null ||
-                      _editedReceiptImage != null ||
-                      (_working.imagePath != null &&
-                          _working.imagePath!.isNotEmpty))
-                  ? 'Retake Image'
-                  : 'Add Image',
+            // Retake button - always visible to trigger picker/upload
+            ElevatedButton.icon(
+              onPressed: _updateReceiptImage,
+              icon: const Icon(Icons.camera_alt_outlined),
+              label: Text(
+                (_editedReceiptUrl != null ||
+                    _editedReceiptImage != null ||
+                    (_working.imagePath != null &&
+                        _working.imagePath!.isNotEmpty))
+                    ? 'Retake Image'
+                    : 'Add Image',
+              ),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue[50],
+                foregroundColor: Colors.blue,
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              ),
             ),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue[50],
-              foregroundColor: Colors.blue,
-              padding: const EdgeInsets.symmetric(vertical: 12),
-            ),
+          ],
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
