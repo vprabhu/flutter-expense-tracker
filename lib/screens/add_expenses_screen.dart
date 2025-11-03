@@ -80,9 +80,7 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
         // Read image bytes
         List<int> imageBytes = await file.readAsBytes();
 
-        // Replace with your actual API key from imgbb.com
-        String apiKey = '388e521a61a69a4e1b459a35107702b3';  // e.g., '12345abcde'
-        print('Uploading to ImgBB...');  // Debug log
+        String apiKey = '388e521a61a69a4e1b459a35107702b3';
 
         String url = 'https://api.imgbb.com/1/upload?key=$apiKey';
         var request = http.MultipartRequest('POST', Uri.parse(url));
