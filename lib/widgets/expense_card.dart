@@ -34,7 +34,8 @@ Widget buildExpenseCard(Expense expense, VoidCallback onTap) {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    expense.title,
+                    expense.note ?? expense.title,
+                    // expense.title,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w500,

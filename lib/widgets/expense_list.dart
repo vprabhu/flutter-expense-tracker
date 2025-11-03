@@ -17,15 +17,17 @@ class ExpenseList extends StatelessWidget {
     if (expenses.isEmpty) {
       return const Center(child: Text('No expenses for this period'));
     }
+// Sort by newest first (descending by date)
+    final sortedExpenses = expenses.toList()..sort((a, b) => b.date.compareTo(a.date));
 
     return ListView.separated(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      itemCount: expenses.length,
+      itemCount: sortedExpenses.length,
       separatorBuilder: (_, __) => const SizedBox(height: 12),
       itemBuilder: (_, i) => buildExpenseCard(
-        expenses[i],
-        () => onExpenseTap(expenses[i]),
+        sortedExpenses[i],  // Use sorted list
+        () => onExpenseTap(sortedExpenses[i]),
       ),
     );
   }
