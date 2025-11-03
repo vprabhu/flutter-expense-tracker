@@ -45,6 +45,7 @@ class _ExpenseDetailsScreenState extends ConsumerState<ExpenseDetailsScreen> {
     _dateCtrl = TextEditingController(text: DateFormat.yMMMd().format(_working.date));
     _selectedCategory = _working.category;
     _selectedDate = _working.date;
+    print("AAAAA Img ${_working.imagePath}");
   }
 
   /* ----------------------------------------------------------
@@ -161,22 +162,30 @@ class _ExpenseDetailsScreenState extends ConsumerState<ExpenseDetailsScreen> {
             ),
           ],
         ),
+        if (_working.imagePath != null && _working.imagePath!.isNotEmpty)
+          Column(
+            children: [
+              const Text('Uploaded Image:'),
+              const SizedBox(height: 10),
+              Image.network(
+                _working.imagePath!,
+                height: 200,
+                fit: BoxFit.cover,
+                loadingBuilder: (context, child, loadingProgress) {
+                  if (loadingProgress == null) return child;
+                  return const CircularProgressIndicator();
+                },
+                errorBuilder: (context, error, stackTrace) =>
+                const Text('Error loading image'),
+              ),
+            ],
+          ),
         const SizedBox(height: 24),
         // rows
         _row('Category', _working.category),
         _row('Date', DateFormat.yMMMd().format(_working.date)),
         _row('Note', _working.note ?? '–'),
         const SizedBox(height: 24),
-        // receipt placeholder
-        Container(
-          height: 200,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.green[400],
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: const Icon(Icons.receipt_long, size: 50, color: Colors.white),
-        ),
       ],
     ),
   );

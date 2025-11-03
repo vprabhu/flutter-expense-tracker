@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:expense_tracker/model/expense.dart';
 import 'package:expense_tracker/utils/Constants.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +9,16 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../repo/expense_repository.dart';
 import '../utils/formatters.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:image_picker/image_picker.dart';
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'dart:io';
+import 'package:http/http.dart' as http;
+import 'package:image_picker/image_picker.dart';
+import 'package:flutter/material.dart';  // For ScaffoldMessenger
 
 // AddExpenseScreen: Full-screen modal for adding new expense
 // Structure: Form with validation; on Save, return true to parent for refresh
@@ -25,7 +37,8 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   String? _selectedCategory;
   DateTime? _selectedDate = DateTime.now();
 
-  // File? _receiptImage;
+  File? _receiptImage;
+  String? _receiptUrl;
 
 
   // Functionality: Pick date using showDatePicker
@@ -44,18 +57,88 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
   }
 
   // Functionality: Upload receipt - simulate with image picker
-  /*  Future<void> _uploadReceipt() async {
+
+  Future<void> _uploadReceipt() async {
     final picker = ImagePicker();
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
     if (pickedFile != null) {
+      final file = File(pickedFile.path);
       setState(() {
-        _receiptImage = File(pickedFile.path);
+        _receiptImage = file;
       });
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Receipt uploaded!')),
-      );
+
+      // Check file size (ImgBB limit: 32MB)
+      int fileSizeInBytes = await file.length();
+      if (fileSizeInBytes > 32 * 1024 * 1024) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Image too large (max 32MB for ImgBB)')),
+        );
+        return;
+      }
+
+      try {
+        // Read image bytes
+        List<int> imageBytes = await file.readAsBytes();
+
+        // Replace with your actual API key from imgbb.com
+        String apiKey = '388e521a61a69a4e1b459a35107702b3';  // e.g., '12345abcde'
+        print('Uploading to ImgBB...');  // Debug log
+
+        String url = 'https://api.imgbb.com/1/upload?key=$apiKey';
+        var request = http.MultipartRequest('POST', Uri.parse(url));
+
+        // Add image file
+        request.files.add(
+          http.MultipartFile.fromBytes(
+            'image',  // Must be 'image' field
+            imageBytes,
+            filename: 'receipt_${DateTime.now().millisecondsSinceEpoch}.jpg',  // Optional, but good
+          ),
+        );
+
+        print('Uploading to ImgBB...');  // Debug log
+        var streamedResponse = await request.send();
+        var response = await http.Response.fromStream(streamedResponse);
+
+        print('Response status: ${response.statusCode}');  // Log status
+        print('Response body: ${response.body}');  // Full error details
+
+        if (response.statusCode == 200) {
+          Map<String, dynamic> data = json.decode(response.body);
+          if (data['status'] == 200) {
+            String downloadUrl = data['data']['url'];  // HTTP URL like https://i.ibb.co/abc123.jpg
+
+            setState(() {
+              _receiptUrl = downloadUrl;
+            });
+
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Receipt uploaded to ImgBB!')),
+            );
+          } else {
+            throw Exception('ImgBB API error: ${data['error']['message'] ?? 'Unknown'}');
+          }
+        } else {
+          // Handle 400, 401, etc.
+          Map<String, dynamic>? errorData = json.decode(response.body);
+          String errorMsg = errorData?['error']['message'] ?? 'HTTP ${response.statusCode}';
+          throw Exception('ImgBB upload failed: $errorMsg');
+        }
+      } on http.ClientException catch (e) {
+        print('Network error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Network error - check connection')),
+        );
+      } catch (e) {
+        print('Upload error: $e');
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Upload failed: $e')),
+        );
+      }
     }
-  }*/
+  }
+
+
 
   // Functionality: Save expense - validate form, then pop with success
   Future<void> _saveExpense() async {
@@ -69,6 +152,8 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
       color: Colors.blue[300],
       date: _selectedDate!,
       note: _noteController.text.trim(),
+      imagePath: _receiptUrl,
+      // imagePath: _receiptImage?.path,
     );
 
     /* Show progress indicator while async call runs */
@@ -230,16 +315,78 @@ class _AddExpenseScreenState extends ConsumerState<AddExpenseScreen> {
                           style: TextStyle(color: Colors.grey),
                         ),
                         const SizedBox(height: 16),
-                        // ElevatedButton.icon(
-                        //   onPressed: _uploadReceipt,
-                        //   icon: const Icon(Icons.upload, size: 18),
-                        //   label: const Text('Upload'),
-                        //   style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[50]),
-                        // ),
-                        // if (_receiptImage != null) ...[
-                        //   const SizedBox(height: 8),
-                        //   Text('Image selected: ${_receiptImage!.path.split('/').last}'),
-                        // ],
+                        ElevatedButton.icon(
+                          onPressed: _uploadReceipt,
+                          icon: const Icon(Icons.upload, size: 18),
+                          label: const Text('Upload'),
+                          style: ElevatedButton.styleFrom(backgroundColor: Colors.blue[50]),
+                        ),
+                        if (_receiptImage != null || _receiptUrl != null) ...[
+                          const SizedBox(height: 16),
+                          if (_receiptImage != null && _receiptUrl == null) ...[
+                            const Text('Preview Selected Image:'),
+                            Stack(
+                              children: [
+                                SizedBox(
+                                  height: 150,
+                                  child: Image.file(
+                                    _receiptImage!,
+                                    fit: BoxFit.cover,
+                                  ),
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.close, color: Colors.red, size: 24),
+                                    onPressed: () {
+                                      setState(() {
+                                        _receiptImage = null;
+                                      });
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Image removed')),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                          if (_receiptUrl != null) ...[
+                            const Text('Uploaded Image:'),
+                            Stack(
+                              children: [
+                                Image.network(
+                                  _receiptUrl!,
+                                  height: 150,
+                                  fit: BoxFit.cover,
+                                  loadingBuilder: (context, child, loadingProgress) {
+                                    if (loadingProgress == null) return child;
+                                    return const CircularProgressIndicator();
+                                  },
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Text('Error loading uploaded image');
+                                  },
+                                ),
+                                Positioned(
+                                  top: 0,
+                                  right: 0,
+                                  child: IconButton(
+                                    icon: const Icon(Icons.close, color: Colors.red, size: 24),
+                                    onPressed: () {
+                                      setState(() {
+                                        _receiptUrl = null;
+                                      });
+                                      ScaffoldMessenger.of(context).showSnackBar(
+                                        const SnackBar(content: Text('Image removed from selection')),
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ],
                       ],
                     ),
                   ),
