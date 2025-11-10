@@ -6,6 +6,7 @@ import '../widgets/pie_chart.dart';
 import '../widgets/spendingBreakdown.dart';
 import 'add_expenses_screen.dart';
 import 'expense_details_screen.dart';
+import 'expenses_list_screen.dart';
 import 'filter_screen.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -84,17 +85,13 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
         builder: (context) => FilterExpensesScreen(initialRange: _filterRange),
       ),
     );
-      setState(() {
-        _filterRange = range;
-      });
+    setState(() {
+      _filterRange = range;
+    });
     if (range != null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Filter applied',
-          ),
-        ),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Filter applied')));
     }
   }
 
@@ -102,6 +99,12 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
     Navigator.of(context).push(
       MaterialPageRoute(builder: (_) => ExpenseDetailsScreen(expense: expense)),
     );
+  }
+
+  void _navigateToStats() {
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => ExpensesListScreen()));
   }
 
   /* ===================================================================
@@ -139,7 +142,7 @@ class _ExpensesScreenState extends ConsumerState<ExpensesScreen> {
                   style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 16),
-                buildSpendingBreakdown(total, pieData),
+                buildSpendingBreakdown(total, pieData, _navigateToStats),
                 const SizedBox(height: 24),
 
                 /* ---------------  Recent Expenses  --------------- */
